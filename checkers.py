@@ -8,7 +8,7 @@ import random
 import numpy as np
 
 
-class GuiHeckers(QMainWindow):
+class GuiHeckers(QWidget):
     def __init__(self):
         super().__init__()
         self.game_size = (8, 8)
@@ -57,7 +57,7 @@ class GuiHeckers(QMainWindow):
                     btn_checker.clicked.connect(
                         lambda state, obj=btn_checker, i=i, j=j: self.catch_button_checkers(obj, i, j, 'black'))
                 self.btns[i][j] = btn
-        self.showFullScreen()
+        self.show()
 
     def _paint_over(self, btn, i, j):
         if i % 2 == 0 and j % 2 == 0:
@@ -110,5 +110,8 @@ class GuiHeckers(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = GuiHeckers()
+    w = GuiHeckers()
+    w.resize(800, 800)
+    w.setWindowTitle('Checkers Online')
+    w.show()
     sys.exit(app.exec_())
