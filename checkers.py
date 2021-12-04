@@ -8,7 +8,7 @@ import random
 import numpy as np
 
 
-class GuiHeckers(QWidget):
+class GuiCheckers(QWidget):
     def __init__(self):
         super().__init__()
         self.game_size = (8, 8)
@@ -110,7 +110,7 @@ class GuiHeckers(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    w = GuiHeckers()
+    w = GuiCheckers()
     w.resize(800, 800)
     w.setWindowTitle('Checkers Online')
     w.show()
