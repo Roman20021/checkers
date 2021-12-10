@@ -121,7 +121,7 @@ class GuiCheckers(QWidget):
 
     def change_coordinates(self):
         if (self.cell_btn[1], self.cell_btn[-1]) not in list(
-                self.coordinates_black_checkers.keys()
+            self.coordinates_black_checkers.keys()
         ) and (self.cell_btn[1], self.cell_btn[-1]) not in list(
             self.coordinates_white_checkers.keys()
         ):
@@ -154,7 +154,6 @@ class GuiCheckers(QWidget):
 
 
 class Client:
-
     def __init__(self, ip, port):
         self.connect(ip, port)
         self.data = None

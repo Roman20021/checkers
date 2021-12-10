@@ -3,6 +3,7 @@ import socket
 import time
 from threading import Thread
 from checkers import GuiCheckers
+
 BUFFER = 1024
 
 
@@ -50,7 +51,7 @@ class Server:
         self.listen()
 
     def listen(self):
-        print('Start')
+        print("Start")
         self.sock.listen(2)
         while True:
             connection, address = self.sock.accept()
@@ -61,7 +62,7 @@ class Server:
 
             self.clients.append(client)
 
-            print(f'Connected {address}')
+            print(f"Connected {address}")
             Thread(target=self.client_loop, args=(client,)).start()
 
     def print(self, response):
@@ -74,7 +75,7 @@ class Server:
                 self.print(response)
                 self.send_all(client, response)
             else:
-                raise Exception('Client disconnected')
+                raise Exception("Client disconnected")
         except Exception:
             self.close_client(client)
             return False
@@ -97,10 +98,9 @@ class Server:
                 print(text)
                 client.connection.send(pickle.dumps(f"{from_client.name}: {text}"))
 
-
     def close_client(self, client):
         self.clients.remove(client)
         client.connection.close()
 
 
-server = Server('localhost', 8090)
+server = Server("localhost", 8090)
