@@ -121,7 +121,7 @@ class GuiCheckers(QWidget):
 
     def change_coordinates(self):
         if (self.cell_btn[1], self.cell_btn[-1]) not in list(
-                self.coordinates_black_checkers.keys()
+            self.coordinates_black_checkers.keys()
         ) and (self.cell_btn[1], self.cell_btn[-1]) not in list(
             self.coordinates_white_checkers.keys()
         ):
@@ -162,11 +162,22 @@ class Client:
         return pickle.loads(msg)
 
     def send(self, data):
-        self.sock.send(pickle.dumps({'coordinates_black_checkers': list(data.coordinates_black_checkers.keys()),
-                                     'coordinates_white_checkers': list(data.coordinates_white_checkers.keys()),
-                                     'number_black_checkers': data.number_black_checkers,
-                                     'number_white_checkers': data.number_white_checkers,
-                                     'checker_btn': data.checker_btn[1:], 'cell_btn': data.cell_btn[1:]}))
+        self.sock.send(
+            pickle.dumps(
+                {
+                    "coordinates_black_checkers": list(
+                        data.coordinates_black_checkers.keys()
+                    ),
+                    "coordinates_white_checkers": list(
+                        data.coordinates_white_checkers.keys()
+                    ),
+                    "number_black_checkers": data.number_black_checkers,
+                    "number_white_checkers": data.number_white_checkers,
+                    "checker_btn": data.checker_btn[1:],
+                    "cell_btn": data.cell_btn[1:],
+                }
+            )
+        )
 
     def read_socket(self):
         while True:
