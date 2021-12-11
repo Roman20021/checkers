@@ -3,6 +3,7 @@ import socket
 import time
 from threading import Thread
 from checkers import GuiCheckers
+import random
 
 BUFFER = 1024
 
@@ -59,9 +60,15 @@ class Server:
             client = Client()
             client.address = address
             client.connection = connection
-
             self.clients.append(client)
-
+            if len(self.clients) == 2:
+                Random = random.choice([True, False])
+                print(Random)
+                self.clients[0].connection.send(pickle.dumps(Random))
+                if Random == True:
+                    self.clients[-1].connection.send(pickle.dumps(False))
+                else:
+                    self.clients[-1].connection.send(pickle.dumps(True))
             print(f"Connected {address}")
             Thread(target=self.client_loop, args=(client,)).start()
 
