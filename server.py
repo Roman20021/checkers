@@ -97,6 +97,7 @@ class Server:
             if client != from_client:
                 print(text)
                 client.connection.send(pickle.dumps(f"{from_client.name}: {text}"))
+        from_client.connection.send(pickle.dumps("Отправлено"))
 
     def close_client(self, client):
         self.clients.remove(client)

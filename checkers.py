@@ -121,10 +121,14 @@ class GuiCheckers(QWidget):
 
     def change_coordinates(self):
         if (self.cell_btn[1], self.cell_btn[-1]) not in list(
-            self.coordinates_black_checkers.keys()
+                self.coordinates_black_checkers.keys()
         ) and (self.cell_btn[1], self.cell_btn[-1]) not in list(
             self.coordinates_white_checkers.keys()
         ):
+            thread = Thread(target=self.client.send, args=(self,))
+            thread.start()
+            time.sleep(0.2)
+            thread.join()
             collor = self.checker_btn[-1]
             x_checker = self.checker_btn[1]
             y_checker = self.checker_btn[2]
@@ -147,27 +151,27 @@ class GuiCheckers(QWidget):
                     obj, i, j, collor
                 )
             )
-            thread = Thread(target=self.client.send)
-            thread.start()
-            time.sleep(0.2)
-            thread.join()
 
 
 class Client:
     def __init__(self, ip, port):
         self.connect(ip, port)
-        self.data = None
 
     def recieve(self):
         msg = self.sock.recv(SIZE_OF_PART)
         return pickle.loads(msg)
 
-    def send(self):
-        self.sock.send(pickle.dumps(self.data))
+    def send(self, data):
+        self.sock.send(pickle.dumps({'coordinates_black_checkers': list(data.coordinates_black_checkers.keys()),
+                                     'coordinates_white_checkers': list(data.coordinates_white_checkers.keys()),
+                                     'number_black_checkers': data.number_black_checkers,
+                                     'number_white_checkers': data.number_white_checkers,
+                                     'checker_btn': data.checker_btn[1:], 'cell_btn': data.cell_btn[1:]}))
 
     def read_socket(self):
         while True:
             data = self.recieve()
+            print(data)
 
     def loop(self):
         self.thread = Thread(target=self.read_socket)
@@ -188,7 +192,6 @@ if __name__ == "__main__":
     client = Client("localhost", 8090)
     app = QApplication(sys.argv)
     w = GuiCheckers(client)
-    client.data = w
     w.resize(800, 800)
     w.setWindowTitle("Checkers Online")
     sys.exit(app.exec_())
