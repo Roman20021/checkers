@@ -130,10 +130,6 @@ class GuiCheckers(QWidget):
             and self.color != None
             and self.color == self.checker_btn[-1]
         ):
-            thread = Thread(target=self.client.send)
-            thread.start()
-            time.sleep(0.2)
-            thread.join()
             collor = self.checker_btn[-1]
             x_checker = self.checker_btn[1]
             y_checker = self.checker_btn[2]
@@ -150,6 +146,10 @@ class GuiCheckers(QWidget):
             if self.checker_btn[3] == "white":
                 del self.coordinates_white_checkers[(x_checker, y_checker)]
                 self.coordinates_white_checkers[(x_cell, y_cell)] = btn
+            thread = Thread(target=self.client.send)
+            thread.start()
+            time.sleep(0.2)
+            thread.join()
             self.checker_btn = None
             btn.clicked.connect(
                 lambda state, obj=btn, i=x_cell, j=y_cell: self.catch_button_checkers(
