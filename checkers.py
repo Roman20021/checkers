@@ -1,3 +1,5 @@
+import threading
+
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -10,15 +12,22 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QIcon
 from PyQt5 import uic, QtWidgets, QtCore
 from PyQt5.QtCore import QThread, pyqtSignal, QObject, pyqtSlot, Qt
+import pickle
+import socket
+import time
+from threading import Thread
 
 import sys
 import random
 import numpy as np
 
+SIZE_OF_PART = 1024
+
 
 class GuiCheckers(QWidget):
-    def __init__(self):
+    def __init__(self, client):
         super().__init__()
+        self.client = client
         self.game_size = (8, 8)
         self.coordinates_black_checkers = {}
         self.coordinates_white_checkers = {}
@@ -115,7 +124,11 @@ class GuiCheckers(QWidget):
             self.coordinates_black_checkers.keys()
         ) and (self.cell_btn[1], self.cell_btn[-1]) not in list(
             self.coordinates_white_checkers.keys()
-        ):  # отдельный метод с условием должно быть
+        ):
+            thread = Thread(target=self.client.send, args=(self,))
+            thread.start()
+            time.sleep(0.2)
+            thread.join()
             collor = self.checker_btn[-1]
             x_checker = self.checker_btn[1]
             y_checker = self.checker_btn[2]
@@ -140,10 +153,56 @@ class GuiCheckers(QWidget):
             )
 
 
+class Client:
+    def __init__(self, ip, port):
+        self.connect(ip, port)
+
+    def recieve(self):
+        msg = self.sock.recv(SIZE_OF_PART)
+        return pickle.loads(msg)
+
+    def send(self, data):
+        self.sock.send(
+            pickle.dumps(
+                {
+                    "coordinates_black_checkers": list(
+                        data.coordinates_black_checkers.keys()
+                    ),
+                    "coordinates_white_checkers": list(
+                        data.coordinates_white_checkers.keys()
+                    ),
+                    "number_black_checkers": data.number_black_checkers,
+                    "number_white_checkers": data.number_white_checkers,
+                    "checker_btn": data.checker_btn[1:],
+                    "cell_btn": data.cell_btn[1:],
+                }
+            )
+        )
+
+    def read_socket(self):
+        while True:
+            data = self.recieve()
+            print(data)
+
+    def loop(self):
+        self.thread = Thread(target=self.read_socket)
+        self.thread.start()
+
+    def connect(self, ip, port):
+        self.sock = socket.socket()
+        self.sock.connect((ip, port))
+
+        self.loop()
+
+    def disconnect(self):
+        self.thread.join()
+        self.sock.close()
+
+
 if __name__ == "__main__":
+    client = Client("localhost", 8090)
     app = QApplication(sys.argv)
-    w = GuiCheckers()
+    w = GuiCheckers(client)
     w.resize(800, 800)
     w.setWindowTitle("Checkers Online")
-    w.show()
     sys.exit(app.exec_())
