@@ -27,6 +27,8 @@ SIZE_OF_PART = 1024
 class GuiCheckers(QWidget):
     def __init__(self, client):
         super().__init__()
+        client.data = self
+        self.color = None
         self.client = client
         self.game_size = (8, 8)
         self.coordinates_black_checkers = {}
@@ -120,12 +122,15 @@ class GuiCheckers(QWidget):
             self.change_coordinates()
 
     def change_coordinates(self):
-        if (self.cell_btn[1], self.cell_btn[-1]) not in list(
-            self.coordinates_black_checkers.keys()
-        ) and (self.cell_btn[1], self.cell_btn[-1]) not in list(
-            self.coordinates_white_checkers.keys()
+        if (
+            (self.cell_btn[1], self.cell_btn[-1])
+            not in list(self.coordinates_black_checkers.keys())
+            and (self.cell_btn[1], self.cell_btn[-1])
+            not in list(self.coordinates_white_checkers.keys())
+            and self.color != None
+            and self.color == self.checker_btn[-1]
         ):
-            thread = Thread(target=self.client.send, args=(self,))
+            thread = Thread(target=self.client.send)
             thread.start()
             time.sleep(0.2)
             thread.join()
@@ -156,25 +161,26 @@ class GuiCheckers(QWidget):
 class Client:
     def __init__(self, ip, port):
         self.connect(ip, port)
+        self.data = None
 
     def recieve(self):
         msg = self.sock.recv(SIZE_OF_PART)
         return pickle.loads(msg)
 
-    def send(self, data):
+    def send(self):
         self.sock.send(
             pickle.dumps(
                 {
                     "coordinates_black_checkers": list(
-                        data.coordinates_black_checkers.keys()
+                        self.data.coordinates_black_checkers.keys()
                     ),
                     "coordinates_white_checkers": list(
-                        data.coordinates_white_checkers.keys()
+                        self.data.coordinates_white_checkers.keys()
                     ),
-                    "number_black_checkers": data.number_black_checkers,
-                    "number_white_checkers": data.number_white_checkers,
-                    "checker_btn": data.checker_btn[1:],
-                    "cell_btn": data.cell_btn[1:],
+                    "number_black_checkers": self.data.number_black_checkers,
+                    "number_white_checkers": self.data.number_white_checkers,
+                    "checker_btn": self.data.checker_btn[1:],
+                    "cell_btn": self.data.cell_btn[1:],
                 }
             )
         )
@@ -182,6 +188,9 @@ class Client:
     def read_socket(self):
         while True:
             data = self.recieve()
+            if data in ("white", "black"):
+                time.sleep(0.2)
+                self.data.color = data
             print(data)
 
     def loop(self):

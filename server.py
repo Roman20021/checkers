@@ -62,13 +62,13 @@ class Server:
             client.connection = connection
             self.clients.append(client)
             if len(self.clients) == 2:
-                Random = random.choice([True, False])
+                Random = random.choice(["white", "black"])
                 print(Random)
                 self.clients[0].connection.send(pickle.dumps(Random))
-                if Random == True:
-                    self.clients[-1].connection.send(pickle.dumps(False))
+                if Random == "white":
+                    self.clients[-1].connection.send(pickle.dumps("black"))
                 else:
-                    self.clients[-1].connection.send(pickle.dumps(True))
+                    self.clients[-1].connection.send(pickle.dumps("white"))
             print(f"Connected {address}")
             Thread(target=self.client_loop, args=(client,)).start()
 
