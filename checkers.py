@@ -60,7 +60,7 @@ class GuiCheckers(QWidget):
             for j in range(self.game_size[1]):
                 btn = QPushButton(f"", self)
                 btn.setGeometry(i * 100, j * 100, 100, 100)
-                if (i, j) in self.coordinates_white_checkers:
+                if (i, j) in list(self.coordinates_white_checkers.keys()):
                     self.coordinates_white_checkers[(i, j)] = btn
                     btn.setStyleSheet(f"background-color: white;")
                     btn.clicked.connect(
@@ -68,7 +68,7 @@ class GuiCheckers(QWidget):
                             obj, i, j, "white"
                         )
                     )
-                elif (i, j) in self.coordinates_black_checkers:
+                elif (i, j) in list(self.coordinates_black_checkers.keys()):
                     self.coordinates_black_checkers[(i, j)] = btn
                     btn.setStyleSheet(f"background-color: black;")
                     btn.clicked.connect(
@@ -103,9 +103,6 @@ class GuiCheckers(QWidget):
             self.change_coordinates()
 
     def change_coordinates(self):
-        print((self.cell_btn[1], self.cell_btn[-1]) in self.coordinates_black_checkers)
-        print((self.cell_btn[1], self.cell_btn[-1]) in self.coordinates_white_checkers)
-        print(self.permission_change_main_checker)
         if (
             (self.cell_btn[1], self.cell_btn[-1]) not in self.coordinates_black_checkers
             and (self.cell_btn[1], self.cell_btn[-1])
@@ -124,14 +121,24 @@ class GuiCheckers(QWidget):
                 y_cell = self.cell_btn[2]
                 btn = self.checker_btn[0]
                 btn.setStyleSheet("background-color: red;")
+                self.cell_btn[0].clicked.connect(
+                    lambda state, obj=self.cell_btn[0], i=x_cell, j=y_cell: self.catch_button_checkers(
+                        obj, i, j, f"{collor}"
+                    )
+                )
+                btn.clicked.connect(
+                    lambda state, obj=btn, i=x_checker, j=y_checker: self.catch_button_cells(
+                        obj, i, j
+                    )
+                )
                 if self.checker_btn[3] == "black":
                     self.cell_btn[0].setStyleSheet("background-color: black;")
                     del self.coordinates_black_checkers[(x_checker, y_checker)]
-                    self.coordinates_black_checkers[(x_cell, y_cell)] = btn
+                    self.coordinates_black_checkers[(x_cell, y_cell)] = self.cell_btn[0]
                 if self.checker_btn[3] == "white":
                     self.cell_btn[0].setStyleSheet("background-color: white;")
                     del self.coordinates_white_checkers[(x_checker, y_checker)]
-                    self.coordinates_white_checkers[(x_cell, y_cell)] = btn
+                    self.coordinates_white_checkers[(x_cell, y_cell)] = self.cell_btn[0]
                 if self.permission_send:
                     thread = Thread(target=self.client.send)
                     thread.start()
