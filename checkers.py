@@ -111,7 +111,7 @@ class GuiCheckers(QWidget):
         btn = QPushButton(f"", self)
         btn.setGeometry(i * 100, j * 100, 50, 50)
         btn.setStyleSheet(
-            f"background-color: {collor}; font-size: 40px; font-weight: bold"
+            f"background-color: {collor}; font-size: 40px; font-weight: bold;border-style: outset;border-radius: 25px;text-align: center;"
         )
         return btn
 
@@ -125,11 +125,11 @@ class GuiCheckers(QWidget):
 
     def change_coordinates(self):
         if (
-                (self.cell_btn[1], self.cell_btn[-1])
-                not in list(self.coordinates_black_checkers.keys())
-                and (self.cell_btn[1], self.cell_btn[-1])
-                not in list(self.coordinates_white_checkers.keys())
-                and self.color != None
+            (self.cell_btn[1], self.cell_btn[-1])
+            not in list(self.coordinates_black_checkers.keys())
+            and (self.cell_btn[1], self.cell_btn[-1])
+            not in list(self.coordinates_white_checkers.keys())
+            and self.color != None
         ):
             if self.color == self.checker_btn[-1] or self.permission_change_checker:
                 collor = self.checker_btn[-1]
@@ -196,22 +196,42 @@ class Client:
             else:
                 self.data.permission_change_checker = True
                 self.data.permission_send = False
-                print(data)
-                print(type(data))
-                cell_btn = self.data.btns[data['cell_btn'][0]][data['cell_btn'][1]]
+                cell_btn = self.data.btns[data["cell_btn"][0]][data["cell_btn"][1]]
                 btn = None
-                if self.data.color == 'white':
-                    checker_btn = self.data.coordinates_black_checkers[(data['checker_btn'][0], data['checker_btn'][1])]
-                    self.data.catch_button_checkers(checker_btn, data['checker_btn'][0], data['checker_btn'][1],
-                                                    'black')
-                    btn = self.data._paint_checkers('black',data['checker_btn'][0], data['checker_btn'][1])
+                if self.data.color == "white":
+                    checker_btn = self.data.coordinates_black_checkers[
+                        (data["checker_btn"][0], data["checker_btn"][1])
+                    ]
+                    self.data.catch_button_checkers(
+                        checker_btn,
+                        data["checker_btn"][0],
+                        data["checker_btn"][1],
+                        "black",
+                    )
+                    btn = self.data._paint_checkers(
+                        "black", data["checker_btn"][0], data["checker_btn"][1]
+                    )
                 else:
-                    checker_btn = self.data.coordinates_white_checkers[(data['checker_btn'][0], data['checker_btn'][1])]
-                    self.data.catch_button_checkers(checker_btn, data['checker_btn'][0], data['checker_btn'][1],
-                                                    'white')
-                    btn = self.data._paint_checkers('white', data['checker_btn'][0], data['checker_btn'][1])
-                thread = Thread(target=self.data.catch_button_cells,
-                                args=(cell_btn, data['cell_btn'][0], data['cell_btn'][1],))
+                    checker_btn = self.data.coordinates_white_checkers[
+                        (data["checker_btn"][0], data["checker_btn"][1])
+                    ]
+                    self.data.catch_button_checkers(
+                        checker_btn,
+                        data["checker_btn"][0],
+                        data["checker_btn"][1],
+                        "white",
+                    )
+                    btn = self.data._paint_checkers(
+                        "white", data["checker_btn"][0], data["checker_btn"][1]
+                    )
+                thread = Thread(
+                    target=self.data.catch_button_cells,
+                    args=(
+                        cell_btn,
+                        data["cell_btn"][0],
+                        data["cell_btn"][1],
+                    ),
+                )
                 thread.start()
                 thread.join()
             print(data)
@@ -232,7 +252,7 @@ class Client:
 
 
 if __name__ == "__main__":
-    client = Client("localhost", 8090)
+    client = Client("10.17.64.41", 8090)
     app = QApplication(sys.argv)
     w = GuiCheckers(client)
     w.resize(800, 800)

@@ -105,10 +105,9 @@ class Server:
                 print(text)
                 client.connection.send(pickle.dumps(text))
 
-
     def close_client(self, client):
         self.clients.remove(client)
         client.connection.close()
 
 
-server = Server("localhost", 8090)
+server = Server("", 8090)
