@@ -28,7 +28,8 @@ class GuiCheckers(QWidget):
     def __init__(self, client):
         super().__init__()
         client.data = self
-        self.permission_change_checker = False
+        self.permission_change_stranger_checker = False
+        self.permission_change_main_checker = True
         self.permission_send = True
         self.color = None
         self.client = client
@@ -54,66 +55,44 @@ class GuiCheckers(QWidget):
                     self.coordinates_white_checkers[(i, j)] = None
 
     def get_gui(self):
-        self.white_checkers_btns = np.zeros(self.game_size, dtype=QPushButton)
-        self.black_checkers_btns = np.zeros(self.game_size, dtype=QPushButton)
         self.btns = np.zeros(self.game_size, dtype=QPushButton)
         for i in range(self.game_size[0]):
             for j in range(self.game_size[1]):
                 btn = QPushButton(f"", self)
                 btn.setGeometry(i * 100, j * 100, 100, 100)
-                btn = self._paint_over(btn, i, j)
-                btn.clicked.connect(
-                    lambda state, obj=btn, i=i, j=j: self.catch_button_cells(obj, i, j)
-                )
-                if (i, j) in list(self.coordinates_white_checkers.keys()):
-                    btn_checker = self._paint_checkers("white", i, j)
-                    self.white_checkers_btns[i, j] = btn_checker
-                    self.coordinates_white_checkers[(i, j)] = btn_checker
-                    btn_checker.clicked.connect(
-                        lambda state, obj=btn_checker, i=i, j=j: self.catch_button_checkers(
+                if (i, j) in self.coordinates_white_checkers:
+                    self.coordinates_white_checkers[(i, j)] = btn
+                    btn.setStyleSheet(f"background-color: white;")
+                    btn.clicked.connect(
+                        lambda state, obj=btn, i=i, j=j: self.catch_button_checkers(
                             obj, i, j, "white"
                         )
                     )
-                    btn_checker.show()
-                if (i, j) in list(self.coordinates_black_checkers.keys()):
-                    btn_checker = self._paint_checkers("black", i, j)
-                    self.black_checkers_btns[i, j] = btn_checker
-                    self.coordinates_black_checkers[(i, j)] = btn_checker
-                    btn_checker.clicked.connect(
-                        lambda state, obj=btn_checker, i=i, j=j: self.catch_button_checkers(
+                elif (i, j) in self.coordinates_black_checkers:
+                    self.coordinates_black_checkers[(i, j)] = btn
+                    btn.setStyleSheet(f"background-color: black;")
+                    btn.clicked.connect(
+                        lambda state, obj=btn, i=i, j=j: self.catch_button_checkers(
                             obj, i, j, "black"
                         )
                     )
-                    btn_checker.show()
+                else:
+                    self._paint_over(btn, i, j)
+                    btn.clicked.connect(
+                        lambda state, obj=btn, i=i, j=j: self.catch_button_cells(
+                            obj, i, j
+                        )
+                    )
                 self.btns[i][j] = btn
         self.show()
 
     def _paint_over(self, btn, i, j):
-        if i % 2 == 0 and j % 2 == 0:
-            btn.setStyleSheet(
-                "background-color: white; font-size: 20px; font-weight: bold"
-            )
         if i % 2 == 0 and j % 2 != 0:
-            btn.setStyleSheet(
-                "background-color: gray; font-size: 20px; font-weight: bold"
-            )
-        if i % 2 != 0 and j % 2 != 0:
-            btn.setStyleSheet(
-                "background-color: white; font-size: 20px; font-weight: bold"
-            )
-        if i % 2 != 0 and j % 2 == 0:
-            btn.setStyleSheet(
-                "background-color: gray; font-size: 20px; font-weight: bold"
-            )
-        return btn
-
-    def _paint_checkers(self, collor, i, j):
-        btn = QPushButton(f"", self)
-        btn.setGeometry(i * 100, j * 100, 50, 50)
-        btn.setStyleSheet(
-            f"background-color: {collor}; font-size: 40px; font-weight: bold;border-style: outset;border-radius: 25px;text-align: center;"
-        )
-        return btn
+            btn.setStyleSheet("background-color: red; ")
+        elif i % 2 != 0 and j % 2 == 0:
+            btn.setStyleSheet("background-color: red; ")
+        else:
+            btn.deleteLater()
 
     def catch_button_checkers(self, btn, x, y, collor):
         self.checker_btn = (btn, x, y, collor)
@@ -124,40 +103,43 @@ class GuiCheckers(QWidget):
             self.change_coordinates()
 
     def change_coordinates(self):
+        print((self.cell_btn[1], self.cell_btn[-1]) in self.coordinates_black_checkers)
+        print((self.cell_btn[1], self.cell_btn[-1]) in self.coordinates_white_checkers)
+        print(self.permission_change_main_checker)
         if (
-            (self.cell_btn[1], self.cell_btn[-1])
-            not in list(self.coordinates_black_checkers.keys())
+            (self.cell_btn[1], self.cell_btn[-1]) not in self.coordinates_black_checkers
             and (self.cell_btn[1], self.cell_btn[-1])
-            not in list(self.coordinates_white_checkers.keys())
+            not in self.coordinates_white_checkers
             and self.color != None
+            and self.permission_change_main_checker
         ):
-            if self.color == self.checker_btn[-1] or self.permission_change_checker:
+            if (
+                self.color == self.checker_btn[-1]
+                or self.permission_change_stranger_checker
+            ):
                 collor = self.checker_btn[-1]
                 x_checker = self.checker_btn[1]
                 y_checker = self.checker_btn[2]
                 x_cell = self.cell_btn[1]
                 y_cell = self.cell_btn[2]
                 btn = self.checker_btn[0]
-                btn.setGeometry(x_cell * 100, y_cell * 100, 50, 50)
+                btn.setStyleSheet("background-color: red;")
                 if self.checker_btn[3] == "black":
+                    self.cell_btn[0].setStyleSheet("background-color: black;")
                     del self.coordinates_black_checkers[(x_checker, y_checker)]
                     self.coordinates_black_checkers[(x_cell, y_cell)] = btn
                 if self.checker_btn[3] == "white":
+                    self.cell_btn[0].setStyleSheet("background-color: white;")
                     del self.coordinates_white_checkers[(x_checker, y_checker)]
                     self.coordinates_white_checkers[(x_cell, y_cell)] = btn
                 if self.permission_send:
                     thread = Thread(target=self.client.send)
                     thread.start()
-                    time.sleep(0.2)
+                    time.sleep(0.4)
                     thread.join()
-                self.permission_change_checker = False
+                self.permission_change_stranger_checker = False
                 self.permission_send = True
                 self.checker_btn = None
-                btn.clicked.connect(
-                    lambda state, obj=btn, i=x_cell, j=y_cell: self.catch_button_checkers(
-                        obj, i, j, collor
-                    )
-                )
 
 
 class Client:
@@ -170,14 +152,15 @@ class Client:
         return pickle.loads(msg)
 
     def send(self):
+        self.data.permission_change_main_checker = False
         self.sock.send(
             pickle.dumps(
                 {
                     "coordinates_black_checkers": list(
-                        self.data.coordinates_black_checkers.keys()
+                        self.data.coordinates_black_checkers
                     ),
                     "coordinates_white_checkers": list(
-                        self.data.coordinates_white_checkers.keys()
+                        self.data.coordinates_white_checkers
                     ),
                     "number_black_checkers": self.data.number_black_checkers,
                     "number_white_checkers": self.data.number_white_checkers,
@@ -191,13 +174,13 @@ class Client:
         while True:
             data = self.recieve()
             if data in ("white", "black"):
-                time.sleep(0.2)
+                time.sleep(0.09)
                 self.data.color = data
             else:
-                self.data.permission_change_checker = True
+                self.data.permission_change_main_checker = True
+                self.data.permission_change_stranger_checker = True
                 self.data.permission_send = False
                 cell_btn = self.data.btns[data["cell_btn"][0]][data["cell_btn"][1]]
-                btn = None
                 if self.data.color == "white":
                     checker_btn = self.data.coordinates_black_checkers[
                         (data["checker_btn"][0], data["checker_btn"][1])
@@ -207,9 +190,6 @@ class Client:
                         data["checker_btn"][0],
                         data["checker_btn"][1],
                         "black",
-                    )
-                    btn = self.data._paint_checkers(
-                        "black", data["checker_btn"][0], data["checker_btn"][1]
                     )
                 else:
                     checker_btn = self.data.coordinates_white_checkers[
@@ -221,9 +201,6 @@ class Client:
                         data["checker_btn"][1],
                         "white",
                     )
-                    btn = self.data._paint_checkers(
-                        "white", data["checker_btn"][0], data["checker_btn"][1]
-                    )
                 thread = Thread(
                     target=self.data.catch_button_cells,
                     args=(
@@ -234,7 +211,6 @@ class Client:
                 )
                 thread.start()
                 thread.join()
-            print(data)
 
     def loop(self):
         self.thread = Thread(target=self.read_socket)
@@ -252,7 +228,7 @@ class Client:
 
 
 if __name__ == "__main__":
-    client = Client("10.17.64.41", 8090)
+    client = Client("localhost", 8090)
     app = QApplication(sys.argv)
     w = GuiCheckers(client)
     w.resize(800, 800)
