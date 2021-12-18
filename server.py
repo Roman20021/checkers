@@ -102,7 +102,6 @@ class Server:
     def send_all(self, from_client, text):
         for client in self.clients:
             if client != from_client:
-                print(text)
                 client.connection.send(pickle.dumps(text))
 
     def close_client(self, client):
