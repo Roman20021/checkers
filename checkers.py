@@ -24,6 +24,37 @@ import numpy as np
 SIZE_OF_PART = 1024
 
 
+class Button:
+    def __init__(self):
+        self.__btn = None
+        self.__x = None
+        self.__y = None
+
+    @property
+    def x(self):
+        return self.__x
+
+    @property
+    def y(self):
+        return self.__y
+
+    @property
+    def btn(self):
+        return self.__btn
+
+    @x.setter
+    def x(self, x):
+        self.__x = x
+
+    @y.setter
+    def y(self, y):
+        self.__y = y
+
+    @btn.setter
+    def btn(self, btn):
+        self.__btn = btn
+
+
 class GuiCheckers(QWidget):
     def __init__(self, client):
         super().__init__()
@@ -36,6 +67,7 @@ class GuiCheckers(QWidget):
         self.game_size = (8, 8)
         self.coordinates_black_checkers = {}
         self.coordinates_white_checkers = {}
+        self.sell_btns = {}
         self.checker_btn = None
         self.cell_btn = None
         self.number_black_checkers = 12
@@ -55,85 +87,88 @@ class GuiCheckers(QWidget):
                     self.coordinates_white_checkers[(i, j)] = None
 
     def get_gui(self):
-        self.btns = np.zeros(self.game_size, dtype=QPushButton)
         for i in range(self.game_size[0]):
             for j in range(self.game_size[1]):
                 if i % 2 == 0 and j % 2 != 0 or i % 2 != 0 and j % 2 == 0:
-                    btn = QPushButton(f"", self)
-                    btn.setGeometry(i * 100, j * 100, 100, 100)
+                    btn = Button()
+                    btn.btn = QPushButton(f"", self)
+                    btn.btn.setGeometry(i * 100, j * 100, 100, 100)
                     if (i, j) in list(self.coordinates_white_checkers.keys()):
                         self.coordinates_white_checkers[(i, j)] = btn
-                        btn.setStyleSheet(f"background-color: white;")
-                        btn.clicked.connect(
-                            lambda state, obj=btn, i=i, j=j: self.catch_button_checkers(
-                                obj, i, j, "white"
+                        btn.btn.setStyleSheet(f"background-color: white;")
+                        btn.btn.clicked.connect(
+                            lambda state, obj=btn: self.catch_button_checkers(
+                                obj, "white"
                             )
                         )
                     elif (i, j) in list(self.coordinates_black_checkers.keys()):
                         self.coordinates_black_checkers[(i, j)] = btn
-                        btn.setStyleSheet(f"background-color: black;")
-                        btn.clicked.connect(
-                            lambda state, obj=btn, i=i, j=j: self.catch_button_checkers(
-                                obj, i, j, "black"
+                        btn.btn.setStyleSheet(f"background-color: black;")
+                        btn.btn.clicked.connect(
+                            lambda state, obj=btn: self.catch_button_checkers(
+                                obj, "black"
                             )
                         )
                     else:
-                        self._paint_over(btn, i, j)
-                        btn.clicked.connect(
-                            lambda state, obj=btn, i=i, j=j: self.catch_button_cells(
-                                obj, i, j
-                            )
+                        self._paint_over(btn.btn)
+                        btn.btn.clicked.connect(
+                            lambda state, obj=btn: self.catch_button_cells(obj)
                         )
-                    self.btns[i][j] = btn
+                        self.sell_btns[(i, j)] = btn
+                    btn.x = i
+                    btn.y = j
         self.show()
 
-    def _paint_over(self, btn, i, j):
+    def _paint_over(self, btn):
         btn.setStyleSheet("background-color: red; ")
 
-    def catch_button_checkers(self, btn, x, y, collor):
-        self.checker_btn = (btn, x, y, collor)
+    def catch_button_checkers(self, btn, collor):
+        self.checker_btn = (btn, btn.x, btn.y, collor)
 
-    def catch_button_cells(self, btn, x, y):
-        self.cell_btn = (btn, x, y)
+    def catch_button_cells(self, btn):
+        self.cell_btn = (btn, btn.x, btn.y)
         if self.checker_btn != None:
             self.change_coordinates()
 
     def change_coordinates(self):
         if (
-                (self.cell_btn[1], self.cell_btn[-1]) not in self.coordinates_black_checkers.keys()
-                and (self.cell_btn[1], self.cell_btn[-1])
-                not in self.coordinates_white_checkers.keys()
-                and self.color != None
-                and self.permission_change_main_checker
+            (self.cell_btn[1], self.cell_btn[-1])
+            not in list(self.coordinates_black_checkers.keys())
+            and (self.cell_btn[1], self.cell_btn[-1])
+            not in list(self.coordinates_white_checkers.keys())
+            and self.color != None
+            and self.permission_change_main_checker
         ):
             if (
-                    self.color == self.checker_btn[-1]
-                    or self.permission_change_stranger_checker
+                self.color == self.checker_btn[-1]
+                or self.permission_change_stranger_checker
             ):
                 collor = self.checker_btn[-1]
                 x_checker = self.checker_btn[1]
                 y_checker = self.checker_btn[2]
                 x_cell = self.cell_btn[1]
                 y_cell = self.cell_btn[2]
-                btn = self.checker_btn[0]
+                btn = self.checker_btn[0].btn
                 btn.setGeometry(x_cell * 100, y_cell * 100, 100, 100)
-                btn.clicked.connect(
-                    lambda state, obj=btn, i=x_cell, j=y_cell: self.catch_button_checkers(
-                        obj, i, j, f"{collor}"
-                    )
+                self.cell_btn[0].btn.setGeometry(
+                    x_checker * 100, y_checker * 100, 100, 100
                 )
-                self.cell_btn[0].setGeometry(x_checker * 100, y_checker * 100, 100, 100)
-                self.cell_btn[0].clicked.connect(
-                    lambda state, obj=self.cell_btn[0], i=x_checker, j=y_checker: self.catch_button_cells(
-                        obj, i, j
-                    )
-                )
+                self.checker_btn[0].x = x_cell
+                self.checker_btn[0].y = y_cell
+                self.cell_btn[0].x = x_checker
+                self.cell_btn[0].y = y_checker
+                del self.sell_btns[(x_cell, y_cell)]
+                self.sell_btns[(x_checker, y_checker)] = self.cell_btn[0]
                 if self.checker_btn[3] == "black":
                     del self.coordinates_black_checkers[(x_checker, y_checker)]
-                    self.coordinates_black_checkers[(x_cell, y_cell)] = self.cell_btn[0]
+                    self.coordinates_black_checkers[
+                        (x_cell, y_cell)
+                    ] = self.checker_btn[0]
                 if self.checker_btn[3] == "white":
                     del self.coordinates_white_checkers[(x_checker, y_checker)]
-                    self.coordinates_white_checkers[(x_cell, y_cell)] = self.cell_btn[0]
+                    self.coordinates_white_checkers[
+                        (x_cell, y_cell)
+                    ] = self.checker_btn[0]
                 if self.permission_send:
                     thread = Thread(target=self.client.send)
                     thread.start()
@@ -158,12 +193,6 @@ class Client:
         self.sock.send(
             pickle.dumps(
                 {
-                    "coordinates_black_checkers": list(
-                        self.data.coordinates_black_checkers.keys()
-                    ),
-                    "coordinates_white_checkers": list(
-                        self.data.coordinates_white_checkers.keys()
-                    ),
                     "number_black_checkers": self.data.number_black_checkers,
                     "number_white_checkers": self.data.number_white_checkers,
                     "checker_btn": self.data.checker_btn[1:],
@@ -182,15 +211,15 @@ class Client:
                 self.data.permission_change_main_checker = True
                 self.data.permission_change_stranger_checker = True
                 self.data.permission_send = False
-                cell_btn = self.data.btns[data["cell_btn"][0]][data["cell_btn"][1]]
+                cell_btn = self.data.sell_btns[
+                    (data["cell_btn"][0], data["cell_btn"][1])
+                ]
                 if self.data.color == "white":
                     checker_btn = self.data.coordinates_black_checkers[
                         (data["checker_btn"][0], data["checker_btn"][1])
                     ]
                     self.data.catch_button_checkers(
                         checker_btn,
-                        data["checker_btn"][0],
-                        data["checker_btn"][1],
                         "black",
                     )
                 else:
@@ -199,17 +228,11 @@ class Client:
                     ]
                     self.data.catch_button_checkers(
                         checker_btn,
-                        data["checker_btn"][0],
-                        data["checker_btn"][1],
                         "white",
                     )
                 thread = Thread(
                     target=self.data.catch_button_cells,
-                    args=(
-                        cell_btn,
-                        data["cell_btn"][0],
-                        data["cell_btn"][1],
-                    ),
+                    args=(cell_btn,),
                 )
                 thread.start()
                 thread.join()
