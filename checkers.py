@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QIcon
 from PyQt5 import uic, QtWidgets, QtCore
-from PyQt5.QtCore import QThread, pyqtSignal, QObject, pyqtSlot, Qt
+from PyQt5.QtCore import QThread, pyqtSignal, QObject, pyqtSlot, Qt, QSize
 import pickle
 import socket
 import time
@@ -95,7 +95,9 @@ class GuiCheckers(QWidget):
                     btn.btn.setGeometry(i * 100, j * 100, 100, 100)
                     if (i, j) in list(self.coordinates_white_checkers.keys()):
                         self.coordinates_white_checkers[(i, j)] = btn
-                        btn.btn.setStyleSheet(f"background-color: white;")
+                        btn.btn.setStyleSheet(f"background-color: #537abb;")
+                        btn.btn.setIcon(QIcon('белая_шашка.jfif'))
+                        btn.btn.setIconSize(QSize(100, 100))
                         btn.btn.clicked.connect(
                             lambda state, obj=btn: self.catch_button_checkers(
                                 obj, "white"
@@ -103,7 +105,9 @@ class GuiCheckers(QWidget):
                         )
                     elif (i, j) in list(self.coordinates_black_checkers.keys()):
                         self.coordinates_black_checkers[(i, j)] = btn
-                        btn.btn.setStyleSheet(f"background-color: black;")
+                        btn.btn.setStyleSheet(f"background-color: #537abb;")
+                        btn.btn.setIcon(QIcon('черная_шашка.jfif'))
+                        btn.btn.setIconSize(QSize(100, 100))
                         btn.btn.clicked.connect(
                             lambda state, obj=btn: self.catch_button_checkers(
                                 obj, "black"
