@@ -138,6 +138,16 @@ class GuiCheckers(QWidget):
         if self.checker_btn != None:
             self.change_coordinates()
 
+    def black_move(self, checker_btn, cell_btn):
+        if checker_btn[-1] == 'black':
+            return cell_btn[2] == checker_btn[2] + 1
+        return True
+
+    def white_move(self, checker_btn, cell_btn):
+        if checker_btn[-1] == 'white':
+            return cell_btn[2] == checker_btn[2] - 1
+        return True
+
     def change_coordinates(self):
         if (
                 (self.cell_btn[1], self.cell_btn[-1])
@@ -146,6 +156,8 @@ class GuiCheckers(QWidget):
                 not in list(self.coordinates_white_checkers.keys())
                 and self.color != None
                 and self.permission_change_main_checker
+                and self.black_move(self.checker_btn, self.cell_btn)
+                and self.white_move(self.checker_btn, self.cell_btn)
         ):
             if (
                     self.color == self.checker_btn[-1]
