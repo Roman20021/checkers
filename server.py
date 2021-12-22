@@ -46,11 +46,10 @@ class Client:
 class Server:
     def __init__(self, ip, port):
         self.clients = []
-        if len(self.clients) <= 2:
-            self.sock = socket.socket()
-            self.sock.bind((ip, port))
+        self.sock = socket.socket()
+        self.sock.bind((ip, port))
 
-            self.listen()
+        self.listen()
 
     def listen(self):
         print("Start")

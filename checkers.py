@@ -140,12 +140,12 @@ class GuiCheckers(QWidget):
 
     def black_move(self, checker_btn, cell_btn):
         if checker_btn[-1] == 'black':
-            return cell_btn[2] == checker_btn[2] + 1
+            return cell_btn[2] == checker_btn[2] + 1 and cell_btn[1] == checker_btn[1] + 1 or cell_btn[1] == checker_btn[1] - 1
         return True
 
     def white_move(self, checker_btn, cell_btn):
         if checker_btn[-1] == 'white':
-            return cell_btn[2] == checker_btn[2] - 1
+            return cell_btn[2] == checker_btn[2] - 1 and cell_btn[1] == checker_btn[1] + 1 or cell_btn[1] == checker_btn[1] - 1
         return True
 
     def change_coordinates(self):
@@ -273,6 +273,7 @@ class Client:
 
 
 if __name__ == "__main__":
+    ports = [int(i) for i in range(8000, )]
     client = Client("localhost", 8090)
     app = QApplication(sys.argv)
     w = GuiCheckers(client)
