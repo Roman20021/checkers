@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 from PyQt5.QtGui import QIcon
-from PyQt5 import uic, QtWidgets, QtCore
+from PyQt5 import uic, QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import QThread, pyqtSignal, QObject, pyqtSlot, Qt, QSize
 import pickle
 import socket
@@ -278,4 +278,5 @@ if __name__ == "__main__":
     w = GuiCheckers(client)
     w.resize(800, 800)
     w.setWindowTitle("Checkers Online")
+    w.setWindowIcon(QtGui.QIcon('images.png'))
     sys.exit(app.exec_())
