@@ -147,7 +147,14 @@ class GuiCheckers(QWidget):
 
     def permission_kill_checkers(self):
         print(self.checker_btn, self.cell_btn)
-    
+        if (
+                self.checker_btn[-1] == "white"
+                and (self.checker_btn[1] + 1, self.checker_btn[2] - 1)
+                in self.coordinates_black_checkers.keys()
+                and (self.checker_btn[1] + 2, self.checker_btn[2] - 2) in self.sell_btns
+                and self.cell_btn[0]
+                == self.sell_btns[(self.checker_btn[1] + 2, self.checker_btn[2] - 2)]
+            ):
     def black_move(self, checker_btn, cell_btn):
         if checker_btn[-1] == "black":
             return cell_btn[2] == checker_btn[2] + 1 and (
