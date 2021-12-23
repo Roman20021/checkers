@@ -212,7 +212,19 @@ class GuiCheckers(QWidget):
                 and self.cell_btn[0]
                 == self.sell_btns[(self.checker_btn[1] + 2, self.checker_btn[2] + 2)]
         ):
-        
+            i = self.checker_btn[1] + 1
+            j = self.checker_btn[2] + 1
+            self.coordinates_white_checkers[(i, j)].btn.clicked.disconnect()
+            btn = self.coordinates_white_checkers[(i, j)]
+            btn.btn.clicked.connect(
+                lambda state, obj=btn: self.catch_button_cells(obj)
+            )
+            self.sell_btns[(i, j)] = btn
+            self._paint_over(btn.btn)
+            btn.btn.setIcon(QIcon("K.png"))
+            return True
+
+        return False
     def black_move(self, checker_btn, cell_btn):
         if checker_btn[-1] == "black":
             return cell_btn[2] == checker_btn[2] + 1 and (
