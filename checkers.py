@@ -96,7 +96,7 @@ class GuiCheckers(QWidget):
                     if (i, j) in list(self.coordinates_white_checkers.keys()):
                         self.coordinates_white_checkers[(i, j)] = btn
                         btn.btn.setStyleSheet("background-color: red; ")
-                        btn.btn.setIcon(QIcon('белая_шашка.png'))
+                        btn.btn.setIcon(QIcon("белая_шашка.png"))
                         btn.btn.setIconSize(QSize(100, 100))
                         btn.btn.clicked.connect(
                             lambda state, obj=btn: self.catch_button_checkers(
@@ -106,7 +106,7 @@ class GuiCheckers(QWidget):
                     elif (i, j) in list(self.coordinates_black_checkers.keys()):
                         self.coordinates_black_checkers[(i, j)] = btn
                         btn.btn.setStyleSheet("background-color: red; ")
-                        btn.btn.setIcon(QIcon('черная_шашка.png'))
+                        btn.btn.setIcon(QIcon("черная_шашка.png"))
                         btn.btn.setIconSize(QSize(100, 100))
                         btn.btn.clicked.connect(
                             lambda state, obj=btn: self.catch_button_checkers(
@@ -124,7 +124,7 @@ class GuiCheckers(QWidget):
                 else:
                     btn = QPushButton(f"", self)
                     btn.setGeometry(i * 100, j * 100, 100, 100)
-                    btn.setStyleSheet('background-color: #F0F8FF')
+                    btn.setStyleSheet("background-color: #F0F8FF")
         self.show()
 
     def _paint_over(self, btn):
@@ -138,65 +138,112 @@ class GuiCheckers(QWidget):
         if self.checker_btn != None:
             self.change_coordinates()
 
+    def permission_kill_checkers(self):
+        print(self.checker_btn, self.cell_btn)
+        if (
+            self.checker_btn[-1] == "white"
+            and (self.checker_btn[1] + 1, self.checker_btn[2] - 1)
+            in self.coordinates_black_checkers.keys()
+            and (self.checker_btn[1] + 2, self.checker_btn[2] - 2) in self.sell_btns
+            and self.cell_btn[0]
+            == self.sell_btns[(self.checker_btn[1] + 2, self.checker_btn[2] - 2)]
+        ):
+            return True
+        if (
+            self.checker_btn[-1] == "white"
+            and (self.checker_btn[1] - 1, self.checker_btn[2] - 1)
+            in self.coordinates_black_checkers.keys()
+            and (self.checker_btn[1] - 2, self.checker_btn[2] - 2) in self.sell_btns
+            and self.cell_btn[0]
+            == self.sell_btns[(self.checker_btn[1] - 2, self.checker_btn[2] - 2)]
+        ):
+            return True
+        if (
+            self.checker_btn[-1] == "black"
+            and (self.checker_btn[1] - 1, self.checker_btn[2] + 1)
+            in self.coordinates_white_checkers.keys()
+            and (self.checker_btn[1] - 2, self.checker_btn[2] + 2) in self.sell_btns
+            and self.cell_btn[0]
+            == self.sell_btns[(self.checker_btn[1] - 2, self.checker_btn[2] + 2)]
+        ):
+            return True
+        if (
+            self.checker_btn[-1] == "black"
+            and (self.checker_btn[1] + 1, self.checker_btn[2] + 1)
+            in self.coordinates_white_checkers.keys()
+            and (self.checker_btn[1] + 2, self.checker_btn[2] + 2) in self.sell_btns
+            and self.cell_btn[0]
+            == self.sell_btns[(self.checker_btn[1] + 2, self.checker_btn[2] + 2)]
+        ):
+            return True
+
+        return False
+
     def black_move(self, checker_btn, cell_btn):
-        if checker_btn[-1] == 'black':
-            return cell_btn[2] == checker_btn[2] + 1 and cell_btn[1] == checker_btn[1] + 1 or cell_btn[1] == checker_btn[1] - 1
+        if checker_btn[-1] == "black":
+            return cell_btn[2] == checker_btn[2] + 1 and (
+                cell_btn[1] == checker_btn[1] + 1 or cell_btn[1] == checker_btn[1] - 1
+            )
         return True
 
     def white_move(self, checker_btn, cell_btn):
-        if checker_btn[-1] == 'white':
-            return cell_btn[2] == checker_btn[2] - 1 and cell_btn[1] == checker_btn[1] + 1 or cell_btn[1] == checker_btn[1] - 1
+        if checker_btn[-1] == "white":
+            return cell_btn[2] == checker_btn[2] - 1 and (
+                cell_btn[1] == checker_btn[1] + 1 or cell_btn[1] == checker_btn[1] - 1
+            )
         return True
 
     def change_coordinates(self):
         if (
-                (self.cell_btn[1], self.cell_btn[-1])
-                not in list(self.coordinates_black_checkers.keys())
-                and (self.cell_btn[1], self.cell_btn[-1])
-                not in list(self.coordinates_white_checkers.keys())
-                and self.color != None
-                and self.permission_change_main_checker
-                and self.black_move(self.checker_btn, self.cell_btn)
-                and self.white_move(self.checker_btn, self.cell_btn)
+            (self.cell_btn[1], self.cell_btn[-1])
+            not in list(self.coordinates_black_checkers.keys())
+            and (self.cell_btn[1], self.cell_btn[-1])
+            not in list(self.coordinates_white_checkers.keys())
+            and self.color != None
+            and self.permission_change_main_checker
         ):
             if (
+                self.black_move(self.checker_btn, self.cell_btn)
+                and self.white_move(self.checker_btn, self.cell_btn)
+            ) or self.permission_kill_checkers():
+                if (
                     self.color == self.checker_btn[-1]
                     or self.permission_change_stranger_checker
-            ):
-                collor = self.checker_btn[-1]
-                x_checker = self.checker_btn[1]
-                y_checker = self.checker_btn[2]
-                x_cell = self.cell_btn[1]
-                y_cell = self.cell_btn[2]
-                btn = self.checker_btn[0].btn
-                btn.setGeometry(x_cell * 100, y_cell * 100, 100, 100)
-                self.cell_btn[0].btn.setGeometry(
-                    x_checker * 100, y_checker * 100, 100, 100
-                )
-                self.checker_btn[0].x = x_cell
-                self.checker_btn[0].y = y_cell
-                self.cell_btn[0].x = x_checker
-                self.cell_btn[0].y = y_checker
-                del self.sell_btns[(x_cell, y_cell)]
-                self.sell_btns[(x_checker, y_checker)] = self.cell_btn[0]
-                if self.checker_btn[3] == "black":
-                    del self.coordinates_black_checkers[(x_checker, y_checker)]
-                    self.coordinates_black_checkers[
-                        (x_cell, y_cell)
-                    ] = self.checker_btn[0]
-                if self.checker_btn[3] == "white":
-                    del self.coordinates_white_checkers[(x_checker, y_checker)]
-                    self.coordinates_white_checkers[
-                        (x_cell, y_cell)
-                    ] = self.checker_btn[0]
-                if self.permission_send:
-                    thread = Thread(target=self.client.send)
-                    thread.start()
-                    time.sleep(0.4)
-                    thread.join()
-                self.permission_change_stranger_checker = False
-                self.permission_send = True
-                self.checker_btn = None
+                ):
+                    collor = self.checker_btn[-1]
+                    x_checker = self.checker_btn[1]
+                    y_checker = self.checker_btn[2]
+                    x_cell = self.cell_btn[1]
+                    y_cell = self.cell_btn[2]
+                    btn = self.checker_btn[0].btn
+                    btn.setGeometry(x_cell * 100, y_cell * 100, 100, 100)
+                    self.cell_btn[0].btn.setGeometry(
+                        x_checker * 100, y_checker * 100, 100, 100
+                    )
+                    self.checker_btn[0].x = x_cell
+                    self.checker_btn[0].y = y_cell
+                    self.cell_btn[0].x = x_checker
+                    self.cell_btn[0].y = y_checker
+                    del self.sell_btns[(x_cell, y_cell)]
+                    self.sell_btns[(x_checker, y_checker)] = self.cell_btn[0]
+                    if self.checker_btn[3] == "black":
+                        del self.coordinates_black_checkers[(x_checker, y_checker)]
+                        self.coordinates_black_checkers[
+                            (x_cell, y_cell)
+                        ] = self.checker_btn[0]
+                    if self.checker_btn[3] == "white":
+                        del self.coordinates_white_checkers[(x_checker, y_checker)]
+                        self.coordinates_white_checkers[
+                            (x_cell, y_cell)
+                        ] = self.checker_btn[0]
+                    if self.permission_send:
+                        thread = Thread(target=self.client.send)
+                        thread.start()
+                        time.sleep(0.4)
+                        thread.join()
+                    self.permission_change_stranger_checker = False
+                    self.permission_send = True
+                    self.checker_btn = None
 
 
 class Client:
@@ -273,11 +320,10 @@ class Client:
 
 
 if __name__ == "__main__":
-    ports = [int(i) for i in range(8000, )]
     client = Client("localhost", 8090)
     app = QApplication(sys.argv)
     w = GuiCheckers(client)
     w.resize(800, 800)
     w.setWindowTitle("Checkers Online")
-    w.setWindowIcon(QtGui.QIcon('images.png'))
+    w.setWindowIcon(QtGui.QIcon("images.png"))
     sys.exit(app.exec_())
