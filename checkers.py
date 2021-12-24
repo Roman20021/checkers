@@ -231,7 +231,7 @@ class GuiCheckers(QWidget):
             )
             self.sell_btns[(i, j)] = btn
             self._paint_over(btn.btn)
-            self.number_write_checkers = self.number_write_checkers - 1
+            self.number_white_checkers = self.number_white_checkers - 1
             return True
         if (
                 self.checker_btn[-1] == "black"
@@ -250,7 +250,7 @@ class GuiCheckers(QWidget):
             )
             self.sell_btns[(i, j)] = btn
             self._paint_over(btn.btn)
-            self.number_write_checkers = self.number_write_checkers - 1
+            self.number_white_checkers = self.number_white_checkers - 1
             return True
 
         return False
@@ -387,7 +387,7 @@ class Client:
 
 
 if __name__ == "__main__":
-    client = Client("localhost", 8090)
+    client = Client("10.17.64.16", 80)
     app = QApplication(sys.argv)
     w = GuiCheckers(client)
     sys.exit(app.exec_())
