@@ -25,6 +25,26 @@ import numpy as np
 SIZE_OF_PART = 1024
 
 
+class ParallelCounter(QThread):
+    sendTextSignal = pyqtSignal(str)
+
+    def __init__(self, linedit, w):
+        super().__init__()
+        self.linedit = linedit
+        self.w = w
+        self.sendTextSignal.connect(self.w.add_text)
+
+    def run(self):
+        while True:
+            QThread.msleep(200)
+            if self.w.number_black_checkers == 0 or self.w.number_white_checkers == 0:
+                if self.w.number_black_checkers == 0:
+                    self.sendTextSignal.emit('white win!', self.linedit)
+                else:
+                    self.sendTextSignal.emit('black win!', self.linedit)
+                self.w.self.permission_change_main_checker = False
+                break
+
 class Button:
     def __init__(self):
         self.__btn = None
@@ -59,9 +79,15 @@ class Button:
 class GuiCheckers(QWidget):
     def __init__(self, client):
         super().__init__()
-        client.data = self
         self.permission_change_stranger_checker = False
         self.permission_change_main_checker = True
+        self.white_line_edit = QLineEdit(self)
+        self.white_line_edit.setGeometry(10, 900,300, 50)
+        self.win_line_edit = QLineEdit(self)
+        self.win_line_edit.setGeometry(500, 900,300, 50)
+        self.timer_counter = ParallelCounter(self.win_line_edit, self)
+        self.timer_counter.start()
+        client.data = self
         self.permission_send = True
         self.color = None
         self.client = client
@@ -137,6 +163,9 @@ class GuiCheckers(QWidget):
         btn.setIcon(QIcon("K.png"))
         btn.setIconSize(QSize(200, 200))
 
+    def add_text(self, text, Qline):
+        Qline.setText(text)
+
     def catch_button_checkers(self, btn, collor):
         self.checker_btn = (btn, btn.x, btn.y, collor)
 
@@ -145,7 +174,87 @@ class GuiCheckers(QWidget):
         if self.checker_btn != None:
             self.change_coordinates()
 
-    
+    def permission_kill_checkers(self):
+        print(self.checker_btn, self.cell_btn)
+        if (
+                self.checker_btn[-1] == "white"
+                and (self.checker_btn[1] + 1, self.checker_btn[2] - 1)
+                in self.coordinates_black_checkers.keys()
+                and (self.checker_btn[1] + 2, self.checker_btn[2] - 2) in self.sell_btns
+                and self.cell_btn[0]
+                == self.sell_btns[(self.checker_btn[1] + 2, self.checker_btn[2] - 2)]
+        ):
+            i = self.checker_btn[1] + 1
+            j = self.checker_btn[2] - 1
+            self.coordinates_black_checkers[(i, j)].btn.clicked.disconnect()
+            btn = self.coordinates_black_checkers[(i, j)]
+            btn.btn.clicked.connect(
+                lambda state, obj=btn: self.catch_button_cells(obj)
+            )
+            self.sell_btns[(i, j)] = btn
+            self._paint_over(btn.btn)
+            self.number_black_checkers = self.number_black_checkers - 1
+            return True
+        if (
+                self.checker_btn[-1] == "white"
+                and (self.checker_btn[1] - 1, self.checker_btn[2] - 1)
+                in self.coordinates_black_checkers.keys()
+                and (self.checker_btn[1] - 2, self.checker_btn[2] - 2) in self.sell_btns
+                and self.cell_btn[0]
+                == self.sell_btns[(self.checker_btn[1] - 2, self.checker_btn[2] - 2)]
+        ):
+            i = self.checker_btn[1] - 1
+            j = self.checker_btn[2] - 1
+            self.coordinates_black_checkers[(i, j)].btn.clicked.disconnect()
+            btn = self.coordinates_black_checkers[(i, j)]
+            btn.btn.clicked.connect(
+                lambda state, obj=btn: self.catch_button_cells(obj)
+            )
+            self.sell_btns[(i, j)] = btn
+            self._paint_over(btn.btn)
+            self.number_black_checkers = self.number_black_checkers - 1
+            return True
+        if (
+                self.checker_btn[-1] == "black"
+                and (self.checker_btn[1] - 1, self.checker_btn[2] + 1)
+                in self.coordinates_white_checkers.keys()
+                and (self.checker_btn[1] - 2, self.checker_btn[2] + 2) in self.sell_btns
+                and self.cell_btn[0]
+                == self.sell_btns[(self.checker_btn[1] - 2, self.checker_btn[2] + 2)]
+        ):
+            i = self.checker_btn[1] - 1
+            j = self.checker_btn[2] + 1
+            self.coordinates_white_checkers[(i, j)].btn.clicked.disconnect()
+            btn = self.coordinates_white_checkers[(i, j)]
+            btn.btn.clicked.connect(
+                lambda state, obj=btn: self.catch_button_cells(obj)
+            )
+            self.sell_btns[(i, j)] = btn
+            self._paint_over(btn.btn)
+            self.number_write_checkers = self.number_write_checkers - 1
+            return True
+        if (
+                self.checker_btn[-1] == "black"
+                and (self.checker_btn[1] + 1, self.checker_btn[2] + 1)
+                in self.coordinates_white_checkers.keys()
+                and (self.checker_btn[1] + 2, self.checker_btn[2] + 2) in self.sell_btns
+                and self.cell_btn[0]
+                == self.sell_btns[(self.checker_btn[1] + 2, self.checker_btn[2] + 2)]
+        ):
+            i = self.checker_btn[1] + 1
+            j = self.checker_btn[2] + 1
+            self.coordinates_white_checkers[(i, j)].btn.clicked.disconnect()
+            btn = self.coordinates_white_checkers[(i, j)]
+            btn.btn.clicked.connect(
+                lambda state, obj=btn: self.catch_button_cells(obj)
+            )
+            self.sell_btns[(i, j)] = btn
+            self._paint_over(btn.btn)
+            self.number_write_checkers = self.number_write_checkers - 1
+            return True
+
+        return False
+
     def black_move(self, checker_btn, cell_btn):
         if checker_btn[-1] == "black":
             return cell_btn[2] == checker_btn[2] + 1 and (
@@ -184,15 +293,12 @@ class GuiCheckers(QWidget):
                     self.checker_btn[0].y = y_cell
                     self.cell_btn[0].x = x_checker
                     self.cell_btn[0].y = y_checker
-                    del self.sell_btns[(x_cell, y_cell)]
                     self.sell_btns[(x_checker, y_checker)] = self.cell_btn[0]
                     if self.checker_btn[3] == "black":
-                        del self.coordinates_black_checkers[(x_checker, y_checker)]
                         self.coordinates_black_checkers[
                             (x_cell, y_cell)
                         ] = self.checker_btn[0]
                     if self.checker_btn[3] == "white":
-                        del self.coordinates_white_checkers[(x_checker, y_checker)]
                         self.coordinates_white_checkers[
                             (x_cell, y_cell)
                         ] = self.checker_btn[0]
@@ -234,6 +340,7 @@ class Client:
             if data in ("white", "black"):
                 time.sleep(0.09)
                 self.data.color = data
+                self.data.add_text(f'your color: {data}', self.data.white_line_edit)
             else:
                 self.data.permission_change_main_checker = True
                 self.data.permission_change_stranger_checker = True
