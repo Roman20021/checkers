@@ -109,4 +109,7 @@ class Server:
         client.connection.close()
 
 
-server = Server("", 80)
+for i in range(1, 10):
+    thread = Thread(target=Server, args=("", i, ))
+    thread.start()
+

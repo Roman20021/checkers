@@ -102,9 +102,6 @@ class GuiCheckers(QWidget):
         self.get_first_coordinates()
         self.get_gui()
         self.btn = None
-        self.resize(800, 800)
-        self.setWindowTitle("Checkers Online")
-        self.setWindowIcon(QtGui.QIcon("images.png"))
         self.show()
 
     def get_first_coordinates(self):
@@ -163,8 +160,8 @@ class GuiCheckers(QWidget):
         btn.setIcon(QIcon("K.png"))
         btn.setIconSize(QSize(200, 200))
 
-    def add_text(self, text, Qline):
-        Qline.setText(text)
+    def add_text(self, text, qline):
+        qline.setText(text)
 
     def catch_button_checkers(self, btn, collor):
         self.checker_btn = (btn, btn.x, btn.y, collor)
@@ -295,9 +292,7 @@ class GuiCheckers(QWidget):
                     self.cell_btn[0].y = y_checker
                     self.sell_btns[(x_checker, y_checker)] = self.cell_btn[0]
                     if self.checker_btn[3] == "black":
-                        self.coordinates_black_checkers[
-                            (x_cell, y_cell)
-                        ] = self.checker_btn[0]
+                        self.coordinates_black_checkers[(x_cell, y_cell)] = self.checker_btn[0]
                     if self.checker_btn[3] == "white":
                         self.coordinates_white_checkers[
                             (x_cell, y_cell)
@@ -305,8 +300,6 @@ class GuiCheckers(QWidget):
                     if self.permission_send:
                         thread = Thread(target=self.client.send)
                         thread.start()
-                        time.sleep(0.4)
-                        thread.join()
                     self.permission_change_stranger_checker = False
                     self.permission_send = True
                     self.checker_btn = None
@@ -352,10 +345,8 @@ class Client:
                     checker_btn = self.data.coordinates_black_checkers[
                         (data["checker_btn"][0], data["checker_btn"][1])
                     ]
-                    self.data.catch_button_checkers(
-                        checker_btn,
-                        "black",
-                    )
+                    self.data.catch_button_checkers(checker_btn,
+                                                    "black")
                 else:
                     checker_btn = self.data.coordinates_white_checkers[
                         (data["checker_btn"][0], data["checker_btn"][1])
@@ -384,10 +375,3 @@ class Client:
     def disconnect(self):
         self.thread.join()
         self.sock.close()
-
-
-if __name__ == "__main__":
-    client = Client("10.17.64.16", 80)
-    app = QApplication(sys.argv)
-    w = GuiCheckers(client)
-    sys.exit(app.exec_())
