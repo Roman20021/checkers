@@ -110,6 +110,5 @@ class Server:
 
 
 for i in range(1, 10):
-    thread = Thread(target=Server, args=("", i, ))
+    thread = Thread(target=Server, args=("", i,))
     thread.start()
-

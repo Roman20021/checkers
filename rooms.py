@@ -25,8 +25,3 @@ class Room(QWidget):
         client = Client("localhost", port)
         w = GuiCheckers(client)
         self.close()
-
-
-app = QApplication(sys.argv)
-Room()
-sys.exit(app.exec_())

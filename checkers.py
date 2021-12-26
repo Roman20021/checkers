@@ -45,6 +45,7 @@ class ParallelCounter(QThread):
                 self.w.self.permission_change_main_checker = False
                 break
 
+
 class Button:
     def __init__(self):
         self.__btn = None
@@ -82,9 +83,9 @@ class GuiCheckers(QWidget):
         self.permission_change_stranger_checker = False
         self.permission_change_main_checker = True
         self.white_line_edit = QLineEdit(self)
-        self.white_line_edit.setGeometry(10, 900,300, 50)
+        self.white_line_edit.setGeometry(10, 900, 300, 50)
         self.win_line_edit = QLineEdit(self)
-        self.win_line_edit.setGeometry(500, 900,300, 50)
+        self.win_line_edit.setGeometry(500, 900, 300, 50)
         self.timer_counter = ParallelCounter(self.win_line_edit, self)
         self.timer_counter.start()
         client.data = self
