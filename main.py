@@ -1,4 +1,4 @@
-from rooms import *
+from checkers import *
 
 app = QApplication(sys.argv)
 Room()
