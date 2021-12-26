@@ -1,1 +1,2 @@
-# checkers
+запустить server
+запустить main
