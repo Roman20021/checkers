@@ -1,3 +1,4 @@
+import os
 import threading
 from copy import deepcopy
 
@@ -187,14 +188,8 @@ class GuiCheckers(QWidget):
         if self.number_black_checkers == 0 or self.number_white_checkers == 0:
             if self.number_black_checkers == 0:
                 self.add_text('white win!', self.win_line_edit)
-                time.sleep(5)
-                Room()
-                self.close()
             else:
                 self.add_text('black win!', self.win_line_edit)
-                time.sleep(5)
-                Room()
-                self.close()
 
     def change(self, btn):
         if (btn.x, btn.y) in self.cell_btns.keys():
@@ -357,7 +352,8 @@ class Client:
                 }
             )
         )
-        self.data.exit()
+        if self.data.number_black_checkers == 0 or self.data.number_white_checkers == 0:
+            self.data.exit()
 
     def read_socket(self):
         while True:
