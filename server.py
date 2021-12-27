@@ -1,3 +1,4 @@
+import os
 import pickle
 import socket
 import time
@@ -81,8 +82,10 @@ class Server:
                 response = pickle.loads(response)
                 self.print(response)
                 self.send_all(client, response)
-            else:
-                raise Exception("Client disconnected")
+            if response == 'end':
+                self.close_client(self.clients[0])
+                self.close_client(self.clients[1])
+                self.clients = []
         except Exception:
             self.close_client(client)
             return False

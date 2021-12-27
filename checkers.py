@@ -95,6 +95,9 @@ class Button:
 class GuiCheckers(QWidget):
     def __init__(self, client):
         super().__init__()
+        btn = QPushButton(f"exit", self)
+        btn.clicked.connect(lambda state: self.exit())
+        btn.setGeometry(900, 600, 300, 50)
         self.permission_change_stranger_checker = False
         self.permission_change_main_checker = True
         self.white_line_edit = QLineEdit(self)
@@ -185,6 +188,15 @@ class GuiCheckers(QWidget):
         qline.setText(text)
 
     def exit(self):
+        try:
+            self.client.sock.send(pickle.dumps('end'))
+        except ConnectionResetError:
+            pass
+        self.close()
+        os.system("python main.py")
+        exit()
+
+    def win(self):
         if self.number_black_checkers == 0 or self.number_white_checkers == 0:
             if self.number_black_checkers == 0:
                 self.add_text('white win!', self.win_line_edit)
@@ -325,7 +337,7 @@ class GuiCheckers(QWidget):
                         time.sleep(0.4)
                         thread.join()
                     if self.permission_change_stranger_checker:
-                        self.exit()
+                        self.win()
                     self.permission_change_stranger_checker = False
                     self.permission_send = True
                     self.checker_btn = None
@@ -353,7 +365,7 @@ class Client:
             )
         )
         if self.data.number_black_checkers == 0 or self.data.number_white_checkers == 0:
-            self.data.exit()
+            self.data.win()
 
     def read_socket(self):
         while True:
@@ -362,6 +374,10 @@ class Client:
                 time.sleep(0.09)
                 self.data.color = data
                 self.data.add_text(f'your color: {data}', self.data.white_line_edit)
+
+            elif data == 'end':
+                print(21)
+                self.data.exit()
             else:
                 self.data.permission_change_main_checker = True
                 self.data.permission_change_stranger_checker = True
